@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -58,6 +59,7 @@ const Portfolio = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Three.js scene setup
   useEffect(() => {
@@ -204,20 +206,20 @@ const Portfolio = () => {
       
       window.addEventListener("resize", handleResize);
 
-   return () => {
-  const currentMount = mountRef.current;
-  
-  window.removeEventListener("resize", handleResize);
-  cancelAnimationFrame(animationId);
-  if (currentMount && renderer.domElement) {
-    currentMount.removeChild(renderer.domElement);
-  }
-  renderer.dispose();
-  
-  // Dispose of geometries and materials
-  geometries.forEach(geometry => geometry.dispose());
-  materials.forEach(material => material.dispose());
-};
+      return () => {
+        const currentMount = mountRef.current;
+        
+        window.removeEventListener("resize", handleResize);
+        cancelAnimationFrame(animationId);
+        if (currentMount && renderer.domElement) {
+          currentMount.removeChild(renderer.domElement);
+        }
+        renderer.dispose();
+        
+        // Dispose of geometries and materials
+        geometries.forEach(geometry => geometry.dispose());
+        materials.forEach(material => material.dispose());
+      };
     } catch (err) {
       setError(err instanceof Error ? err : new Error("An unknown error occurred"));
       console.error("Error in Three.js setup:", err);
@@ -245,6 +247,11 @@ const Portfolio = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Animation on mount
+  useEffect(() => {
+    setIsVisible(true);
   }, []);
 
   const projects = [
@@ -363,42 +370,44 @@ const Portfolio = () => {
         <div ref={mountRef} className="fixed top-0 left-0 w-full h-full -z-10" />
 
         {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-50 p-6 backdrop-blur-2xl">
-          <div className="flex justify-between items-center">
-            <div className="text-2xl font-bold text-white">Portfolio</div>
-            <button
+        <motion.nav 
+          className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 backdrop-blur-2xl"
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          transition={{ type: "spring", stiffness: 100, damping: 15 }}
+        >
+          <div className="flex justify-between items-center max-w-7xl mx-auto">
+            <motion.div 
+              className="text-xl md:text-2xl font-bold text-white"
+              whileHover={{ scale: 1.05 }}
+            >
+              Portfolio
+            </motion.div>
+            
+            {/* Mobile menu button */}
+            <motion.button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-white hover:text-cyan-400 transition-colors md:hidden"
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-            <div
-              className={`md:flex space-x-8 ${
-                isMenuOpen ? "block" : "hidden"
-              } md:block`}
-            >
-              {[
-                "Home",
-                "About",
-                "Projects",
-                "Experience",
-                "Certifications",
-                "Contact",
-              ].map((item, index) => (
-                <a
+              {isMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </motion.button>
+            
+            {/* Desktop menu */}
+            <div className="hidden md:flex space-x-6 lg:space-x-8">
+              {["Home", "About", "Projects", "Experience", "Certifications", "Contact"].map((item, index) => (
+                <motion.a
                   key={item}
                   href={`#${item.toLowerCase()}`}
                   className={`text-white hover:text-cyan-400 transition-all duration-300 ${
@@ -410,74 +419,173 @@ const Portfolio = () => {
                     e.preventDefault();
                     smoothScrollTo(item.toLowerCase());
                   }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {item}
-                </a>
+                </motion.a>
               ))}
             </div>
           </div>
-        </nav>
+            
+          {/* Mobile menu */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div 
+                className="absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-md md:hidden flex flex-col space-y-4 p-6"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {["Home", "About", "Projects", "Experience", "Certifications", "Contact"].map((item, index) => (
+                  <motion.a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className={`text-white hover:text-cyan-400 transition-all duration-300 text-lg ${
+                      currentSection === index
+                        ? "text-cyan-400 border-l-4 border-cyan-400 pl-3"
+                        : "pl-3"
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      smoothScrollTo(item.toLowerCase());
+                      setIsMenuOpen(false);
+                    }}
+                    whileHover={{ x: 10 }}
+                  >
+                    {item}
+                  </motion.a>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.nav>
 
         {/* Hero Section */}
         <section
           id="home"
           className="min-h-screen flex items-center justify-center relative"
         >
-          <div className="text-center text-white z-10 px-4">
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-br from-cyan-400 to-green-500 bg-clip-text text-transparent">
+          <motion.div 
+            className="text-center text-white z-10 px-4"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <motion.h1 
+              className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-br from-cyan-400 to-green-500 bg-clip-text text-transparent"
+              whileHover={{ scale: 1.02 }}
+            >
               Yasin Sheikh
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-80">
+            </motion.h1>
+            <motion.p 
+              className="text-xl md:text-2xl mb-8 opacity-80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
               Software Developer | Full-Stack Web & AI Enthusiast
-            </p>
-            <div className="space-x-4">
-              <button
+            </motion.p>
+            <motion.div 
+              className="flex flex-col sm:flex-row justify-center gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              <motion.button
                 onClick={() => smoothScrollTo("projects")}
-                className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-cyan-400/25 transition-all duration-300 transform hover:scale-105"
+                className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-cyan-400/25 transition-all duration-300"
+                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(34, 211, 238, 0.3)" }}
+                whileTap={{ scale: 0.95 }}
               >
                 View My Work
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => smoothScrollTo("contact")}
                 className="border border-cyan-400 text-cyan-400 px-8 py-3 rounded-full hover:bg-cyan-400 hover:text-white transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Contact Me
-              </button>
-            </div>
-          </div>
+              </motion.button>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* About Section */}
         <section
           id="about"
-          className="min-h-screen flex items-center justify-center relative"
+          className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <div className="container mx-auto px-6 text-white">
-            <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20">
-              <h2 className="text-5xl font-bold mb-8 text-center">About Me</h2>
+          <motion.div 
+            className="container mx-auto px-6 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
+              whileHover={{ scale: 1.005 }}
+            >
+              <motion.h2 
+                className="text-5xl font-bold mb-8 text-center"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                About Me
+              </motion.h2>
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
                   <h3 className="text-3xl font-bold mb-4 text-cyan-400">
                     Professional Summary
                   </h3>
                   <ul className="list-disc pl-5 space-y-3 mb-6">
-                    <li>
+                    <motion.li
+                      initial={{ x: -20, opacity: 0 }}
+                      whileInView={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      viewport={{ once: true }}
+                    >
                       Software Developer with expertise in Full-Stack Web
                       Development and AI, skilled in React.js, Next.js, Node.js,
                       and MongoDB.
-                    </li>
-                    <li>
+                    </motion.li>
+                    <motion.li
+                      initial={{ x: -20, opacity: 0 }}
+                      whileInView={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                      viewport={{ once: true }}
+                    >
                       Experienced in AI-powered career guidance systems,
                       integrating Google Gemini API, Clerk, and Prisma.
-                    </li>
-                    <li>
+                    </motion.li>
+                    <motion.li
+                      initial={{ x: -20, opacity: 0 }}
+                      whileInView={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.7 }}
+                      viewport={{ once: true }}
+                    >
                       Strong in Data Structures and Algorithms with 300+ problems
                       solved.
-                    </li>
-                    <li>
+                    </motion.li>
+                    <motion.li
+                      initial={{ x: -20, opacity: 0 }}
+                      whileInView={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.8 }}
+                      viewport={{ once: true }}
+                    >
                       Proven success in coding challenges and hackathons,
                       committed to continuous learning and innovation.
-                    </li>
+                    </motion.li>
                   </ul>
 
                   <h3 className="text-3xl font-bold mb-4 text-cyan-400">
@@ -486,73 +594,90 @@ const Portfolio = () => {
                   <div className="mb-6">
                     <p className="font-semibold mb-2">Languages:</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="bg-cyan-400/20 text-cyan-400 px-3 py-1 rounded-full">
-                        Java
-                      </span>
-                      <span className="bg-blue-400/20 text-blue-400 px-3 py-1 rounded-full">
-                        Python
-                      </span>
-                      <span className="bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full">
-                        C
-                      </span>
-                      <span className="bg-green-400/20 text-green-400 px-3 py-1 rounded-full">
-                        C++
-                      </span>
-                      <span className="bg-yellow-400/20 text-yellow-400 px-3 py-1 rounded-full">
-                        JavaScript
-                      </span>
-                      <span className="bg-red-400/20 text-red-400 px-3 py-1 rounded-full">
-                        SQL
-                      </span>
+                      {["Java", "Python", "C", "C++", "JavaScript", "SQL"].map((lang, i) => (
+                        <motion.span
+                          key={lang}
+                          className={`${lang === "Java" ? "bg-cyan-400/20 text-cyan-400" : 
+                                       lang === "Python" ? "bg-blue-400/20 text-blue-400" :
+                                       lang === "C" ? "bg-purple-400/20 text-purple-400" :
+                                       lang === "C++" ? "bg-green-400/20 text-green-400" :
+                                       lang === "JavaScript" ? "bg-yellow-400/20 text-yellow-400" :
+                                       "bg-red-400/20 text-red-400"} px-3 py-1 rounded-full`}
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          transition={{ delay: 0.5 + i * 0.1 }}
+                          viewport={{ once: true }}
+                        >
+                          {lang}
+                        </motion.span>
+                      ))}
                     </div>
 
                     <p className="font-semibold mb-2">Web Development:</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="bg-cyan-400/20 text-cyan-400 px-3 py-1 rounded-full">
-                        React.js
-                      </span>
-                      <span className="bg-blue-400/20 text-blue-400 px-3 py-1 rounded-full">
-                        Next.js
-                      </span>
-                      <span className="bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full">
-                        MongoDB
-                      </span>
-                      <span className="bg-green-400/20 text-green-400 px-3 py-1 rounded-full">
-                        Node.js
-                      </span>
-                      <span className="bg-yellow-400/20 text-yellow-400 px-3 py-1 rounded-full">
-                        Express.js
-                      </span>
-                      <span className="bg-red-400/20 text-red-400 px-3 py-1 rounded-full">
-                        Tailwind CSS
-                      </span>
+                      {["React.js", "Next.js", "MongoDB", "Node.js", "Express.js", "Tailwind CSS"].map((tech, i) => (
+                        <motion.span
+                          key={tech}
+                          className={`${tech === "React.js" ? "bg-cyan-400/20 text-cyan-400" : 
+                                       tech === "Next.js" ? "bg-blue-400/20 text-blue-400" :
+                                       tech === "MongoDB" ? "bg-purple-400/20 text-purple-400" :
+                                       tech === "Node.js" ? "bg-green-400/20 text-green-400" :
+                                       tech === "Express.js" ? "bg-yellow-400/20 text-yellow-400" :
+                                       "bg-red-400/20 text-red-400"} px-3 py-1 rounded-full`}
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          transition={{ delay: 0.6 + i * 0.1 }}
+                          viewport={{ once: true }}
+                        >
+                          {tech}
+                        </motion.span>
+                      ))}
                     </div>
 
                     <p className="font-semibold mb-2">ML Libraries:</p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="bg-cyan-400/20 text-cyan-400 px-3 py-1 rounded-full">
-                        Pandas
-                      </span>
-                      <span className="bg-blue-400/20 text-blue-400 px-3 py-1 rounded-full">
-                        NumPy
-                      </span>
-                      <span className="bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full">
-                        Matplotlib
-                      </span>
-                      <span className="bg-green-400/20 text-green-400 px-3 py-1 rounded-full">
-                        TensorFlow
-                      </span>
+                      {["Pandas", "NumPy", "Matplotlib", "TensorFlow"].map((lib, i) => (
+                        <motion.span
+                          key={lib}
+                          className={`${lib === "Pandas" ? "bg-cyan-400/20 text-cyan-400" : 
+                                       lib === "NumPy" ? "bg-blue-400/20 text-blue-400" :
+                                       lib === "Matplotlib" ? "bg-purple-400/20 text-purple-400" :
+                                       "bg-green-400/20 text-green-400"} px-3 py-1 rounded-full`}
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          transition={{ delay: 0.7 + i * 0.1 }}
+                          viewport={{ once: true }}
+                        >
+                          {lib}
+                        </motion.span>
+                      ))}
                     </div>
                   </div>
-                </div>
-                <div className="flex justify-center">
+                </motion.div>
+                <motion.div 
+                  className="flex justify-center"
+                  initial={{ x: 50, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
                   <div className="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full flex items-center justify-center">
-                    <div className="w-48 h-48 md:w-60 md:h-60 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full opacity-80"></div>
+                    <motion.div 
+                      className="w-48 h-48 md:w-60 md:h-60 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full opacity-80"
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.05, 1],
+                      }}
+                      transition={{ 
+                        rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 4, repeat: Infinity }
+                      }}
+                    />
                   </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Experience Section */}
@@ -560,88 +685,160 @@ const Portfolio = () => {
           id="experience"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <div className="container mx-auto px-6 text-white">
-            <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20">
-              <h2 className="text-5xl font-bold mb-12 text-center">Experience</h2>
+          <motion.div 
+            className="container mx-auto px-6 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
+              whileHover={{ scale: 1.005 }}
+            >
+              <motion.h2 
+                className="text-5xl font-bold mb-12 text-center"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                Experience
+              </motion.h2>
 
-              <div className="mb-16">
+              <motion.div 
+                className="mb-16"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                viewport={{ once: true }}
+              >
                 <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
-                  <h3 className="text-2xl font-bold">
+                  <motion.h3 
+                    className="text-2xl font-bold"
+                    whileHover={{ x: 5 }}
+                  >
                     Outlier Front End Developer For AI Training (Freelance)
-                  </h3>
-                  <span className="bg-cyan-400/20 text-cyan-400 px-4 py-1 rounded-full whitespace-nowrap">
+                  </motion.h3>
+                  <motion.span 
+                    className="bg-cyan-400/20 text-cyan-400 px-4 py-1 rounded-full whitespace-nowrap"
+                    whileHover={{ scale: 1.05 }}
+                  >
                     May 2025 - Present
-                  </span>
+                  </motion.span>
                 </div>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    viewport={{ once: true }}
+                  >
                     Reviewed and validated peer pull requests by analyzing changes
                     in JSON files before and after edits to ensure accuracy and
                     functionality.
-                  </li>
-                  <li>
+                  </motion.li>
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    viewport={{ once: true }}
+                  >
                     Edited and regenerated problem statements to improve clarity
                     and effectiveness for AI model training.
-                  </li>
-                  <li>
+                  </motion.li>
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    viewport={{ once: true }}
+                  >
                     Provided structured feedback on AI outputs, supporting the
                     continuous improvement of generative AI systems.
-                  </li>
+                  </motion.li>
                 </ul>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Projects Section */}
         <section
           id="projects"
-          className="min-h-screen flex items-center justify-center relative"
+          className="min-h-screen flex items-center justify-center relative py-20"
         >
           <div className="container mx-auto px-6 text-white">
-            <h2 className="text-5xl font-bold text-center py-14 mt-10">
+            <motion.h2 
+              className="text-5xl font-bold text-center mb-14"
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+            >
               Featured Projects
-            </h2>
+            </motion.h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {projects.map((project, index) => (
-                <div
+                <motion.div
                   key={index}
-                  className="backdrop-blur-md bg-white/10 rounded-2xl p-6 border border-white/20 hover:scale-105 transition-all duration-500 group cursor-pointer"
+                  className="backdrop-blur-md bg-white/10 rounded-2xl p-6 border border-white/20 hover:scale-[1.02] transition-all duration-500 group cursor-pointer"
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ 
+                    y: -5,
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
+                  }}
                 >
-                  <div
+                  <motion.div
                     className={`w-16 h-16 bg-gradient-to-r ${project.color} rounded-2xl mb-6 group-hover:rotate-225 transition-transform duration-300`}
-                  ></div>
+                    animate={{ 
+                      rotate: 360,
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 4, repeat: Infinity }
+                    }}
+                  />
                   <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
                   <p className="text-gray-300 mb-6">{project.description}</p>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tech.map((tech, techIndex) => (
-                      <span
+                      <motion.span
                         key={techIndex}
                         className="inline-block bg-white/10 text-white px-3 py-1 rounded-full text-sm"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ delay: 0.3 + techIndex * 0.05 }}
+                        viewport={{ once: true }}
                       >
                         {tech}
-                      </span>
+                      </motion.span>
                     ))}
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <a
+                    <motion.a
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-cyan-400 hover:text-white transition-colors"
+                      whileHover={{ x: 5 }}
                     >
                       View on GitHub →
-                    </a>
-                    <a
+                    </motion.a>
+                    <motion.a
                       href={project.Vlink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-cyan-400 hover:text-white transition-colors"
+                      whileHover={{ x: 5 }}
                     >
                       View on Vercel →
-                    </a>
+                    </motion.a>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -652,16 +849,48 @@ const Portfolio = () => {
           id="achievements"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <div className="container mx-auto px-6 text-white">
-            <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20">
-              <h2 className="text-5xl font-bold mb-12 text-center">
+          <motion.div 
+            className="container mx-auto px-6 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
+              whileHover={{ scale: 1.005 }}
+            >
+              <motion.h2 
+                className="text-5xl font-bold mb-12 text-center"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                viewport={{ once: true }}
+              >
                 Achievements
-              </h2>
+              </motion.h2>
 
               <div className="grid md:grid-cols-2 gap-8">
                 {achievements.map((achievement, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0">
+                  <motion.div 
+                    key={index} 
+                    className="flex items-start space-x-4"
+                    initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 + index * 0.2 }}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div 
+                      className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0"
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{ 
+                        rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 4, repeat: Infinity }
+                      }}
+                    >
                       <svg
                         className="w-6 h-6"
                         fill="none"
@@ -675,13 +904,18 @@ const Portfolio = () => {
                           d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
                         />
                       </svg>
-                    </div>
-                    <p className="text-lg">{achievement}</p>
-                  </div>
+                    </motion.div>
+                    <motion.p 
+                      className="text-lg"
+                      whileHover={{ x: 5 }}
+                    >
+                      {achievement}
+                    </motion.p>
+                  </motion.div>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Certifications Section */}
@@ -689,20 +923,53 @@ const Portfolio = () => {
           id="certifications"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <div className="container mx-auto px-6 text-white">
-            <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20">
-              <h2 className="text-5xl font-bold mb-12 text-center">
+          <motion.div 
+            className="container mx-auto px-6 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
+              whileHover={{ scale: 1.005 }}
+            >
+              <motion.h2 
+                className="text-5xl font-bold mb-12 text-center"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                viewport={{ once: true }}
+              >
                 Certifications
-              </h2>
+              </motion.h2>
 
               <div className="grid md:grid-cols-2 gap-8">
                 {certifications.map((cert, index) => (
-                  <div
+                  <motion.div
                     key={index}
                     className="backdrop-blur-md bg-white/5 rounded-2xl p-6 border border-white/10 hover:scale-[1.02] transition-all duration-300"
+                    initial={{ y: 50, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ 
+                      y: -5,
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
+                    }}
                   >
                     <div className="flex items-start space-x-4">
-                      <div className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0">
+                      <motion.div 
+                        className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0"
+                        animate={{ 
+                          rotate: 360,
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{ 
+                          rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                          scale: { duration: 4, repeat: Infinity }
+                        }}
+                      >
                         <svg
                           className="w-6 h-6"
                           fill="currentColor"
@@ -714,44 +981,84 @@ const Portfolio = () => {
                             clipRule="evenodd"
                           />
                         </svg>
-                      </div>
+                      </motion.div>
                       <div>
                         <h3 className="text-xl font-bold mb-1">{cert.title}</h3>
                         <p className="text-gray-300 mb-2">
                           {cert.issuer} • {cert.date}
                         </p>
-                        <a
+                        <motion.a
                           href={cert.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-cyan-400 hover:text-white transition-colors text-sm"
+                          whileHover={{ x: 5 }}
                         >
                           View Credential →
-                        </a>
+                        </motion.a>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Contact Section */}
         <section
           id="contact"
-          className="min-h-screen flex items-center justify-center relative"
+          className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <div className="container mx-auto px-6 text-white text-center py-20">
-            <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20 max-w-2xl mx-auto">
-              <h2 className="text-5xl font-bold mb-8">Contact Me</h2>
-              <p className="text-xl mb-12 opacity-80">
+          <motion.div 
+            className="container mx-auto px-6 text-white text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20 max-w-2xl mx-auto"
+              whileHover={{ scale: 1.005 }}
+            >
+              <motion.h2 
+                className="text-5xl font-bold mb-8"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                Contact Me
+              </motion.h2>
+              <motion.p 
+                className="text-xl mb-12 opacity-80"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                viewport={{ once: true }}
+              >
                 I&apos;m always open to discussing new projects, creative ideas, or
                 opportunities to be part of your vision.
-              </p>
+              </motion.p>
               <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <motion.div 
+                  className="text-center"
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    animate={{ 
+                      rotate: 360,
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 4, repeat: Infinity }
+                    }}
+                  >
                     <svg
                       className="w-8 h-8"
                       fill="currentColor"
@@ -760,17 +1067,34 @@ const Portfolio = () => {
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-semibold mb-2">Email</h3>
-                  <a 
+                  <motion.a 
                     href="mailto:yasinsheikhofficial@gmail.com" 
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
+                    whileHover={{ x: 5 }}
                   >
                     yasinsheikhofficial@gmail.com
-                  </a>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-pink-300 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  </motion.a>
+                </motion.div>
+                <motion.div 
+                  className="text-center"
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-r from-pink-300 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    animate={{ 
+                      rotate: 360,
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 4, repeat: Infinity }
+                    }}
+                  >
                     <svg
                       className="w-8 h-8"
                       fill="currentColor"
@@ -781,17 +1105,34 @@ const Portfolio = () => {
                         d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                       />
                     </svg>
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-semibold mb-2">Phone</h3>
-                  <a 
+                  <motion.a 
                     href="tel:+919834327583" 
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
+                    whileHover={{ x: 5 }}
                   >
                     +91-9834327583
-                  </a>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  </motion.a>
+                </motion.div>
+                <motion.div 
+                  className="text-center"
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    animate={{ 
+                      rotate: 360,
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 4, repeat: Infinity }
+                    }}
+                  >
                     <svg
                       className="w-8 h-8"
                       fill="currentColor"
@@ -802,19 +1143,36 @@ const Portfolio = () => {
                         d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                       />
                     </svg>
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-semibold mb-2">LinkedIn</h3>
-                  <a
+                  <motion.a
                     href="https://linkedin.com/in/yasin-sheikh-101874244"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
+                    whileHover={{ x: 5 }}
                   >
                     linkedin.com/in/yasin-sheikh-101874244
-                  </a>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  </motion.a>
+                </motion.div>
+                <motion.div 
+                  className="text-center"
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    animate={{ 
+                      rotate: 360,
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 4, repeat: Infinity }
+                    }}
+                  >
                     <svg
                       className="w-8 h-8"
                       fill="currentColor"
@@ -825,20 +1183,21 @@ const Portfolio = () => {
                         d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
                       />
                     </svg>
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-semibold mb-2">GitHub</h3>
-                  <a
+                  <motion.a
                     href="https://github.com/yasin321288"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
+                    whileHover={{ x: 5 }}
                   >
                     github.com/yasin321288
-                  </a>
-                </div>
+                  </motion.a>
+                </motion.div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         <style jsx>{`
