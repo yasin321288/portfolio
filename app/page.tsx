@@ -301,7 +301,7 @@ const Portfolio = () => {
   ];
 
   const achievements = [
-    "Top 5 in ZS Campus Beat at Maharaja Agrasen Institute of Technology, Delhi",
+    " Secured Top 5 in ZS Campus Beat at Maharaja Agrasen Institute of Technology, Delhi",
     "Solved 400+ DSA Questions on LeetCode and GeeksforGeeks",
   ];
 
@@ -861,7 +861,7 @@ const Portfolio = () => {
               whileHover={{ scale: 1.005 }}
             >
               <motion.h2 
-                className="text-5xl font-bold mb-12 text-center"
+                className="text-4xl font-bold mb-12 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -935,7 +935,7 @@ const Portfolio = () => {
               whileHover={{ scale: 1.005 }}
             >
               <motion.h2 
-                className="text-5xl font-bold mb-12 text-center"
+                className="text-4xl font-bold mb-12 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
