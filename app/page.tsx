@@ -204,18 +204,20 @@ const Portfolio = () => {
       
       window.addEventListener("resize", handleResize);
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        cancelAnimationFrame(animationId);
-        if (mountRef.current && renderer.domElement) {
-          mountRef.current.removeChild(renderer.domElement);
-        }
-        renderer.dispose();
-        
-        // Dispose of geometries and materials
-        geometries.forEach(geometry => geometry.dispose());
-        materials.forEach(material => material.dispose());
-      };
+   return () => {
+  const currentMount = mountRef.current;
+  
+  window.removeEventListener("resize", handleResize);
+  cancelAnimationFrame(animationId);
+  if (currentMount && renderer.domElement) {
+    currentMount.removeChild(renderer.domElement);
+  }
+  renderer.dispose();
+  
+  // Dispose of geometries and materials
+  geometries.forEach(geometry => geometry.dispose());
+  materials.forEach(material => material.dispose());
+};
     } catch (err) {
       setError(err instanceof Error ? err : new Error("An unknown error occurred"));
       console.error("Error in Three.js setup:", err);
@@ -744,7 +746,7 @@ const Portfolio = () => {
             <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20 max-w-2xl mx-auto">
               <h2 className="text-5xl font-bold mb-8">Contact Me</h2>
               <p className="text-xl mb-12 opacity-80">
-                I'm always open to discussing new projects, creative ideas, or
+                I&apos;m always open to discussing new projects, creative ideas, or
                 opportunities to be part of your vision.
               </p>
               <div className="grid md:grid-cols-2 gap-8 mb-12">
