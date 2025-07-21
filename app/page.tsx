@@ -861,7 +861,7 @@ const Portfolio = () => {
               whileHover={{ scale: 1.005 }}
             >
               <motion.h2 
-                className="text-4xl font-bold mb-12 text-center"
+                className="text-3xl font-bold mb-12 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
