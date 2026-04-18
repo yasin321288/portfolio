@@ -4,7 +4,10 @@ import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Error Boundary Component
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
@@ -72,12 +75,12 @@ const Portfolio = () => {
         75,
         window.innerWidth / window.innerHeight,
         0.1,
-        1000
+        1000,
       );
-      const renderer = new THREE.WebGLRenderer({ 
-        antialias: true, 
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
         alpha: true,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
       });
 
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -138,23 +141,24 @@ const Portfolio = () => {
         THREE.MeshStandardMaterial,
         THREE.Object3DEventMap
       >[] = [];
-      
+
       for (let i = 0; i < 20; i++) {
         const geometry =
           geometries[Math.floor(Math.random() * geometries.length)];
-        const material = materials[Math.floor(Math.random() * materials.length)];
+        const material =
+          materials[Math.floor(Math.random() * materials.length)];
         const mesh = new THREE.Mesh(geometry, material);
 
         mesh.position.set(
           (Math.random() - 0.5) * 30,
           (Math.random() - 0.5) * 30,
-          (Math.random() - 0.5) * 30
+          (Math.random() - 0.5) * 30,
         );
 
         mesh.rotation.set(
           Math.random() * Math.PI,
           Math.random() * Math.PI,
-          Math.random() * Math.PI
+          Math.random() * Math.PI,
         );
 
         mesh.userData = {
@@ -189,12 +193,12 @@ const Portfolio = () => {
 
         renderer.render(scene, camera);
       };
-      
+
       let animationId: number;
       const startAnimation = () => {
         animationId = requestAnimationFrame(animate);
       };
-      
+
       startAnimation();
 
       // Handle resize
@@ -203,25 +207,27 @@ const Portfolio = () => {
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       };
-      
+
       window.addEventListener("resize", handleResize);
 
       return () => {
         const currentMount = mountRef.current;
-        
+
         window.removeEventListener("resize", handleResize);
         cancelAnimationFrame(animationId);
         if (currentMount && renderer.domElement) {
           currentMount.removeChild(renderer.domElement);
         }
         renderer.dispose();
-        
+
         // Dispose of geometries and materials
-        geometries.forEach(geometry => geometry.dispose());
-        materials.forEach(material => material.dispose());
+        geometries.forEach((geometry) => geometry.dispose());
+        materials.forEach((material) => material.dispose());
       };
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("An unknown error occurred"));
+      setError(
+        err instanceof Error ? err : new Error("An unknown error occurred"),
+      );
       console.error("Error in Three.js setup:", err);
     }
   }, []);
@@ -255,6 +261,22 @@ const Portfolio = () => {
   }, []);
 
   const projects = [
+    {
+      title: "Atlas Jobs",
+      description:
+        "Atlas Jobs is a Next.js job board app that fetches live listings from RapidAPI.\nIt includes a server-side /api/jobs endpoint with normalized external job data.\nUsers can search by role, stack, or location through a clean, responsive interface.\nBuilt with reusable components using Next.js 16, React 19, TypeScript, Tailwind CSS, and Axios.",
+      tech: [
+        "Next.js 16",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS 4",
+        "Axios",
+        "RapidAPI",
+      ],
+      color: "from-indigo-500 to-cyan-500",
+      link: "https://github.com/yasin321288/Atlas-Jobs",
+      Vlink: "https://atlas-jobs-sigma.vercel.app/",
+    },
     {
       title: "Sensai Career Coach",
       description:
@@ -300,11 +322,6 @@ const Portfolio = () => {
     },
   ];
 
-  const achievements = [
-    " Secured Top 5 in ZS Campus Beat at Maharaja Agrasen Institute of Technology, Delhi",
-    "Solved 400+ DSA Questions on LeetCode and GeeksforGeeks",
-  ];
-
   const certifications = [
     {
       title: "User Experience Design Fundamentals",
@@ -323,6 +340,12 @@ const Portfolio = () => {
       issuer: "IBM SkillsBuild",
       date: "May 2025",
       link: "https://www.credly.com/badges/49760445-2bd3-48dc-969b-c4a6d8c024a6/public_url",
+    },
+    {
+      title: "Complete Web Development Course",
+      issuer: "Udemy",
+      date: "March 2026",
+      link: "https://drive.google.com/file/d/1cfa5LjFmfEtaYUvCR6fuJXAYLCKJnweG/view",
     },
     {
       title: "AWS APAC Solutions Architecture Virtual Experience Program",
@@ -367,23 +390,26 @@ const Portfolio = () => {
     <ErrorBoundary>
       <div className="relative">
         {/* Three.js Canvas */}
-        <div ref={mountRef} className="fixed top-0 left-0 w-full h-full -z-10" />
+        <div
+          ref={mountRef}
+          className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none"
+        />
 
         {/* Navigation */}
-        <motion.nav 
+        <motion.nav
           className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 backdrop-blur-2xl"
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 15 }}
         >
           <div className="flex justify-between items-center max-w-7xl mx-auto">
-            <motion.div 
+            <motion.div
               className="text-xl md:text-2xl font-bold text-white"
               whileHover={{ scale: 1.05 }}
             >
               Portfolio
             </motion.div>
-            
+
             {/* Mobile menu button */}
             <motion.button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -394,19 +420,46 @@ const Portfolio = () => {
               whileTap={{ scale: 0.95 }}
             >
               {isMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </motion.button>
-            
+
             {/* Desktop menu */}
             <div className="hidden md:flex space-x-6 lg:space-x-8">
-              {["Home", "About", "Projects", "Experience", "Certifications", "Contact"].map((item, index) => (
+              {[
+                "Home",
+                "About",
+                "Projects",
+                "Experience",
+                "Certifications",
+                "Contact",
+              ].map((item, index) => (
                 <motion.a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -427,18 +480,25 @@ const Portfolio = () => {
               ))}
             </div>
           </div>
-            
+
           {/* Mobile menu */}
           <AnimatePresence>
             {isMenuOpen && (
-              <motion.div 
+              <motion.div
                 className="absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-md md:hidden flex flex-col space-y-4 p-6"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {["Home", "About", "Projects", "Experience", "Certifications", "Contact"].map((item, index) => (
+                {[
+                  "Home",
+                  "About",
+                  "Projects",
+                  "Experience",
+                  "Certifications",
+                  "Contact",
+                ].map((item, index) => (
                   <motion.a
                     key={item}
                     href={`#${item.toLowerCase()}`}
@@ -467,27 +527,27 @@ const Portfolio = () => {
           id="home"
           className="min-h-screen flex items-center justify-center relative"
         >
-          <motion.div 
+          <motion.div
             className="text-center text-white z-10 px-4"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <motion.h1 
+            <motion.h1
               className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-br from-cyan-400 to-green-500 bg-clip-text text-transparent"
               whileHover={{ scale: 1.02 }}
             >
               Yasin Sheikh
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-xl md:text-2xl mb-8 opacity-80"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              Software Developer | Full-Stack Web & AI Enthusiast
+              Software Developer | Full-Stack Web, AI & DevOps Enthusiast
             </motion.p>
-            <motion.div 
+            <motion.div
               className="flex flex-col sm:flex-row justify-center gap-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -496,7 +556,10 @@ const Portfolio = () => {
               <motion.button
                 onClick={() => smoothScrollTo("projects")}
                 className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-cyan-400/25 transition-all duration-300"
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(34, 211, 238, 0.3)" }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 10px 25px -5px rgba(34, 211, 238, 0.3)",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 View My Work
@@ -518,18 +581,18 @@ const Portfolio = () => {
           id="about"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <motion.div 
+          <motion.div
             className="container mx-auto px-6 text-white"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <motion.div 
+            <motion.div
               className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
               whileHover={{ scale: 1.005 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-5xl font-bold mb-8 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -555,9 +618,8 @@ const Portfolio = () => {
                       transition={{ delay: 0.5 }}
                       viewport={{ once: true }}
                     >
-                      Software Developer with expertise in Full-Stack Web
-                      Development and AI, skilled in React.js, Next.js, Node.js,
-                      and MongoDB.
+                      Full-Stack Developer with hands-on experience building
+                      scalable apps using React.js, Next.js, and Node.js.
                     </motion.li>
                     <motion.li
                       initial={{ x: -20, opacity: 0 }}
@@ -565,8 +627,8 @@ const Portfolio = () => {
                       transition={{ delay: 0.6 }}
                       viewport={{ once: true }}
                     >
-                      Experienced in AI-powered career guidance systems,
-                      integrating Google Gemini API, Clerk, and Prisma.
+                      Built and deployed CI/CD pipelines using Jenkins, Docker,
+                      and AWS with practical production debugging experience.
                     </motion.li>
                     <motion.li
                       initial={{ x: -20, opacity: 0 }}
@@ -574,8 +636,8 @@ const Portfolio = () => {
                       transition={{ delay: 0.7 }}
                       viewport={{ once: true }}
                     >
-                      Strong in Data Structures and Algorithms with 300+ problems
-                      solved.
+                      Strong problem-solving background in DSA with 400+
+                      questions solved across LeetCode and GeeksforGeeks.
                     </motion.li>
                     <motion.li
                       initial={{ x: -20, opacity: 0 }}
@@ -583,8 +645,8 @@ const Portfolio = () => {
                       transition={{ delay: 0.8 }}
                       viewport={{ once: true }}
                     >
-                      Proven success in coding challenges and hackathons,
-                      committed to continuous learning and innovation.
+                      Experienced in API integration, reusable component design,
+                      and performance-focused frontend engineering.
                     </motion.li>
                   </ul>
 
@@ -594,36 +656,63 @@ const Portfolio = () => {
                   <div className="mb-6">
                     <p className="font-semibold mb-2">Languages:</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {["Java", "Python", "C", "C++", "JavaScript", "SQL"].map((lang, i) => (
-                        <motion.span
-                          key={lang}
-                          className={`${lang === "Java" ? "bg-cyan-400/20 text-cyan-400" : 
-                                       lang === "Python" ? "bg-blue-400/20 text-blue-400" :
-                                       lang === "C" ? "bg-purple-400/20 text-purple-400" :
-                                       lang === "C++" ? "bg-green-400/20 text-green-400" :
-                                       lang === "JavaScript" ? "bg-yellow-400/20 text-yellow-400" :
-                                       "bg-red-400/20 text-red-400"} px-3 py-1 rounded-full`}
-                          initial={{ scale: 0 }}
-                          whileInView={{ scale: 1 }}
-                          transition={{ delay: 0.5 + i * 0.1 }}
-                          viewport={{ once: true }}
-                        >
-                          {lang}
-                        </motion.span>
-                      ))}
+                      {["Java", "Python", "JavaScript", "SQL"].map(
+                        (lang, i) => (
+                          <motion.span
+                            key={lang}
+                            className={`${
+                              lang === "Java"
+                                ? "bg-cyan-400/20 text-cyan-400"
+                                : lang === "Python"
+                                  ? "bg-blue-400/20 text-blue-400"
+                                  : lang === "C"
+                                    ? "bg-purple-400/20 text-purple-400"
+                                    : lang === "C++"
+                                      ? "bg-green-400/20 text-green-400"
+                                      : lang === "JavaScript"
+                                        ? "bg-yellow-400/20 text-yellow-400"
+                                        : "bg-red-400/20 text-red-400"
+                            } px-3 py-1 rounded-full`}
+                            initial={{ scale: 0 }}
+                            whileInView={{ scale: 1 }}
+                            transition={{ delay: 0.5 + i * 0.1 }}
+                            viewport={{ once: true }}
+                          >
+                            {lang}
+                          </motion.span>
+                        ),
+                      )}
                     </div>
 
                     <p className="font-semibold mb-2">Web Development:</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {["React.js", "Next.js", "MongoDB", "Node.js", "Express.js", "Tailwind CSS"].map((tech, i) => (
+                      {[
+                        "React.js",
+                        "Next.js",
+                        "MongoDB",
+                        "SQL",
+                        "Node.js",
+                        "Express.js",
+                        "HTML",
+                        "CSS",
+                        "JavaScript",
+                        "Tailwind CSS",
+                      ].map((tech, i) => (
                         <motion.span
                           key={tech}
-                          className={`${tech === "React.js" ? "bg-cyan-400/20 text-cyan-400" : 
-                                       tech === "Next.js" ? "bg-blue-400/20 text-blue-400" :
-                                       tech === "MongoDB" ? "bg-purple-400/20 text-purple-400" :
-                                       tech === "Node.js" ? "bg-green-400/20 text-green-400" :
-                                       tech === "Express.js" ? "bg-yellow-400/20 text-yellow-400" :
-                                       "bg-red-400/20 text-red-400"} px-3 py-1 rounded-full`}
+                          className={`${
+                            tech === "React.js"
+                              ? "bg-cyan-400/20 text-cyan-400"
+                              : tech === "Next.js"
+                                ? "bg-blue-400/20 text-blue-400"
+                                : tech === "MongoDB"
+                                  ? "bg-purple-400/20 text-purple-400"
+                                  : tech === "Node.js"
+                                    ? "bg-green-400/20 text-green-400"
+                                    : tech === "Express.js"
+                                      ? "bg-yellow-400/20 text-yellow-400"
+                                      : "bg-red-400/20 text-red-400"
+                          } px-3 py-1 rounded-full`}
                           initial={{ scale: 0 }}
                           whileInView={{ scale: 1 }}
                           transition={{ delay: 0.6 + i * 0.1 }}
@@ -636,25 +725,125 @@ const Portfolio = () => {
 
                     <p className="font-semibold mb-2">ML Libraries:</p>
                     <div className="flex flex-wrap gap-2">
-                      {["Pandas", "NumPy", "Matplotlib", "TensorFlow"].map((lib, i) => (
+                      {["Pandas", "NumPy", "Matplotlib", "TensorFlow"].map(
+                        (lib, i) => (
+                          <motion.span
+                            key={lib}
+                            className={`${
+                              lib === "Pandas"
+                                ? "bg-cyan-400/20 text-cyan-400"
+                                : lib === "NumPy"
+                                  ? "bg-blue-400/20 text-blue-400"
+                                  : lib === "Matplotlib"
+                                    ? "bg-purple-400/20 text-purple-400"
+                                    : "bg-green-400/20 text-green-400"
+                            } px-3 py-1 rounded-full`}
+                            initial={{ scale: 0 }}
+                            whileInView={{ scale: 1 }}
+                            transition={{ delay: 0.7 + i * 0.1 }}
+                            viewport={{ once: true }}
+                          >
+                            {lib}
+                          </motion.span>
+                        ),
+                      )}
+                    </div>
+
+                    <p className="font-semibold mb-2 mt-4">DevOps Tools:</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {[
+                        "Linux",
+                        "Git",
+                        "Docker",
+                        "Jenkins",
+                        "Kubernetes",
+                        "AWS EC2",
+                        "Nexus",
+                      ].map((tool, i) => (
                         <motion.span
-                          key={lib}
-                          className={`${lib === "Pandas" ? "bg-cyan-400/20 text-cyan-400" : 
-                                       lib === "NumPy" ? "bg-blue-400/20 text-blue-400" :
-                                       lib === "Matplotlib" ? "bg-purple-400/20 text-purple-400" :
-                                       "bg-green-400/20 text-green-400"} px-3 py-1 rounded-full`}
+                          key={tool}
+                          className={`${
+                            tool === "Linux"
+                              ? "bg-cyan-400/20 text-cyan-400"
+                              : tool === "Git"
+                                ? "bg-orange-400/20 text-orange-400"
+                                : tool === "Docker"
+                                  ? "bg-blue-400/20 text-blue-400"
+                                  : tool === "Jenkins"
+                                    ? "bg-purple-400/20 text-purple-400"
+                                    : tool === "Kubernetes"
+                                      ? "bg-indigo-400/20 text-indigo-400"
+                                      : tool === "AWS EC2"
+                                        ? "bg-yellow-400/20 text-yellow-400"
+                                        : "bg-green-400/20 text-green-400"
+                          } px-3 py-1 rounded-full`}
                           initial={{ scale: 0 }}
                           whileInView={{ scale: 1 }}
-                          transition={{ delay: 0.7 + i * 0.1 }}
+                          transition={{ delay: 0.8 + i * 0.05 }}
                           viewport={{ once: true }}
                         >
-                          {lib}
+                          {tool}
                         </motion.span>
                       ))}
                     </div>
+
+                    <p className="font-semibold mb-2">Core Concepts:</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {[
+                        "OOPs",
+                        "DBMS",
+                        "DSA",
+                        "Operating Systems",
+                        "Computer Networks",
+                        "CI/CD",
+                        "Containerization",
+                        "Cloud Fundamentals",
+                      ].map((concept, i) => (
+                        <motion.span
+                          key={concept}
+                          className={`${
+                            concept === "OOPs"
+                              ? "bg-cyan-400/20 text-cyan-400"
+                              : concept === "DBMS"
+                                ? "bg-blue-400/20 text-blue-400"
+                                : concept === "DSA"
+                                  ? "bg-purple-400/20 text-purple-400"
+                                  : concept === "Operating Systems"
+                                    ? "bg-green-400/20 text-green-400"
+                                    : concept === "Computer Networks"
+                                      ? "bg-pink-400/20 text-pink-400"
+                                      : concept === "CI/CD"
+                                        ? "bg-yellow-400/20 text-yellow-400"
+                                        : concept === "Containerization"
+                                          ? "bg-orange-400/20 text-orange-400"
+                                          : "bg-indigo-400/20 text-indigo-400"
+                          } px-3 py-1 rounded-full`}
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          transition={{ delay: 0.9 + i * 0.05 }}
+                          viewport={{ once: true }}
+                        >
+                          {concept}
+                        </motion.span>
+                      ))}
+                    </div>
+
+                    <h3 className="text-3xl font-bold mb-4 text-cyan-400">
+                      Education
+                    </h3>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li>
+                        B.Tech in AI-ML, Maharaja Agrasen Institute of
+                        Technology (Nov 2022 - Jun 2026) - CGPA: 8.96/10
+                      </li>
+                      <li>
+                        12th Grade, Disha Science, Commerce and Arts Junior
+                        College, Warora (Jun 2020 - Mar 2021) - 94.83%
+                      </li>
+                    </ul>
                   </div>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="flex justify-center"
                   initial={{ x: 50, opacity: 0 }}
                   whileInView={{ x: 0, opacity: 1 }}
@@ -662,15 +851,19 @@ const Portfolio = () => {
                   viewport={{ once: true }}
                 >
                   <div className="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full flex items-center justify-center">
-                    <motion.div 
+                    <motion.div
                       className="w-48 h-48 md:w-60 md:h-60 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full opacity-80"
-                      animate={{ 
+                      animate={{
                         rotate: 360,
                         scale: [1, 1.05, 1],
                       }}
-                      transition={{ 
-                        rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 4, repeat: Infinity }
+                      transition={{
+                        rotate: {
+                          duration: 20,
+                          repeat: Infinity,
+                          ease: "linear",
+                        },
+                        scale: { duration: 4, repeat: Infinity },
                       }}
                     />
                   </div>
@@ -685,18 +878,18 @@ const Portfolio = () => {
           id="experience"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <motion.div 
+          <motion.div
             className="container mx-auto px-6 text-white"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <motion.div 
+            <motion.div
               className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
               whileHover={{ scale: 1.005 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-5xl font-bold mb-12 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -706,7 +899,7 @@ const Portfolio = () => {
                 Experience
               </motion.h2>
 
-              <motion.div 
+              <motion.div
                 className="mb-16"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -714,17 +907,17 @@ const Portfolio = () => {
                 viewport={{ once: true }}
               >
                 <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
-                  <motion.h3 
+                  <motion.h3
                     className="text-2xl font-bold"
                     whileHover={{ x: 5 }}
                   >
-                    Outlier Front End Developer For AI Training (Freelance)
+                    Global Dream Connect - Frontend Developer Intern (Remote)
                   </motion.h3>
-                  <motion.span 
+                  <motion.span
                     className="bg-cyan-400/20 text-cyan-400 px-4 py-1 rounded-full whitespace-nowrap"
                     whileHover={{ scale: 1.05 }}
                   >
-                    May 2025 - Present
+                    January 2026 - Present
                   </motion.span>
                 </div>
                 <ul className="list-disc pl-5 space-y-2">
@@ -734,9 +927,8 @@ const Portfolio = () => {
                     transition={{ delay: 0.5 }}
                     viewport={{ once: true }}
                   >
-                    Reviewed and validated peer pull requests by analyzing changes
-                    in JSON files before and after edits to ensure accuracy and
-                    functionality.
+                    Built responsive and SEO-friendly pages using Next.js and
+                    React.js.
                   </motion.li>
                   <motion.li
                     initial={{ x: -20, opacity: 0 }}
@@ -744,8 +936,7 @@ const Portfolio = () => {
                     transition={{ delay: 0.6 }}
                     viewport={{ once: true }}
                   >
-                    Edited and regenerated problem statements to improve clarity
-                    and effectiveness for AI model training.
+                    Developed reusable UI components using Tailwind CSS.
                   </motion.li>
                   <motion.li
                     initial={{ x: -20, opacity: 0 }}
@@ -753,8 +944,58 @@ const Portfolio = () => {
                     transition={{ delay: 0.7 }}
                     viewport={{ once: true }}
                   >
-                    Provided structured feedback on AI outputs, supporting the
-                    continuous improvement of generative AI systems.
+                    Integrated APIs and optimized performance and
+                    responsiveness.
+                  </motion.li>
+                </ul>
+              </motion.div>
+
+              <motion.div
+                className="mb-16"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
+                  <motion.h3
+                    className="text-2xl font-bold"
+                    whileHover={{ x: 5 }}
+                  >
+                    Outlier AI - Front End Developer For AI Training (Freelance)
+                  </motion.h3>
+                  <motion.span
+                    className="bg-cyan-400/20 text-cyan-400 px-4 py-1 rounded-full whitespace-nowrap"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    May 2025 - June 2025
+                  </motion.span>
+                </div>
+                <ul className="list-disc pl-5 space-y-2">
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.55 }}
+                    viewport={{ once: true }}
+                  >
+                    Reviewed and validated pull requests by analyzing JSON
+                    changes.
+                  </motion.li>
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    viewport={{ once: true }}
+                  >
+                    Improved problem statements for AI model training.
+                  </motion.li>
+                  <motion.li
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.65 }}
+                    viewport={{ once: true }}
+                  >
+                    Provided structured feedback to enhance AI outputs.
                   </motion.li>
                 </ul>
               </motion.div>
@@ -768,7 +1009,7 @@ const Portfolio = () => {
           className="min-h-screen flex items-center justify-center relative py-20"
         >
           <div className="container mx-auto px-6 text-white">
-            <motion.h2 
+            <motion.h2
               className="text-5xl font-bold text-center mb-14"
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
@@ -786,24 +1027,30 @@ const Portfolio = () => {
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 + index * 0.1 }}
                   viewport={{ once: true }}
-                  whileHover={{ 
+                  whileHover={{
                     y: -5,
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
                   }}
                 >
                   <motion.div
                     className={`w-16 h-16 bg-gradient-to-r ${project.color} rounded-2xl mb-6 group-hover:rotate-225 transition-transform duration-300`}
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
-                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 4, repeat: Infinity }
+                    transition={{
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                      scale: { duration: 4, repeat: Infinity },
                     }}
                   />
                   <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
-                  <p className="text-gray-300 mb-6">{project.description}</p>
+                  <p className="text-gray-300 mb-6 whitespace-pre-line">
+                    {project.description}
+                  </p>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tech.map((tech, techIndex) => (
                       <motion.span
@@ -844,97 +1091,23 @@ const Portfolio = () => {
           </div>
         </section>
 
-        {/* Achievements Section */}
-        <section
-          id="achievements"
-          className="min-h-screen flex items-center justify-center relative py-20"
-        >
-          <motion.div 
-            className="container mx-auto px-6 text-white"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <motion.div 
-              className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
-              whileHover={{ scale: 1.005 }}
-            >
-              <motion.h2 
-                className="text-3xl font-bold mb-12 text-center"
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                Achievements
-              </motion.h2>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                {achievements.map((achievement, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-start space-x-4"
-                    initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 + index * 0.2 }}
-                    viewport={{ once: true }}
-                  >
-                    <motion.div 
-                      className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0"
-                      animate={{ 
-                        rotate: 360,
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{ 
-                        rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 4, repeat: Infinity }
-                      }}
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                        />
-                      </svg>
-                    </motion.div>
-                    <motion.p 
-                      className="text-lg"
-                      whileHover={{ x: 5 }}
-                    >
-                      {achievement}
-                    </motion.p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        </section>
-
         {/* Certifications Section */}
         <section
           id="certifications"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <motion.div 
+          <motion.div
             className="container mx-auto px-6 text-white"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <motion.div 
+            <motion.div
               className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20"
               whileHover={{ scale: 1.005 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-4xl font-bold mb-12 text-center"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -953,21 +1126,25 @@ const Portfolio = () => {
                     whileInView={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2 + index * 0.1 }}
                     viewport={{ once: true }}
-                    whileHover={{ 
+                    whileHover={{
                       y: -5,
-                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
                     }}
                   >
                     <div className="flex items-start space-x-4">
-                      <motion.div 
+                      <motion.div
                         className="bg-cyan-400/20 text-cyan-400 p-3 rounded-full flex-shrink-0"
-                        animate={{ 
+                        animate={{
                           rotate: 360,
                           scale: [1, 1.1, 1],
                         }}
-                        transition={{ 
-                          rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                          scale: { duration: 4, repeat: Infinity }
+                        transition={{
+                          rotate: {
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: "linear",
+                          },
+                          scale: { duration: 4, repeat: Infinity },
                         }}
                       >
                         <svg
@@ -1010,18 +1187,18 @@ const Portfolio = () => {
           id="contact"
           className="min-h-screen flex items-center justify-center relative py-20"
         >
-          <motion.div 
+          <motion.div
             className="container mx-auto px-6 text-white text-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <motion.div 
+            <motion.div
               className="backdrop-blur-md bg-white/10 rounded-3xl p-6 md:p-12 border border-white/20 max-w-2xl mx-auto"
               whileHover={{ scale: 1.005 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-5xl font-bold mb-8"
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -1030,33 +1207,37 @@ const Portfolio = () => {
               >
                 Contact Me
               </motion.h2>
-              <motion.p 
+              <motion.p
                 className="text-xl mb-12 opacity-80"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                I&apos;m always open to discussing new projects, creative ideas, or
-                opportunities to be part of your vision.
+                I&apos;m always open to discussing new projects, creative ideas,
+                or opportunities to be part of your vision.
               </motion.p>
               <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <motion.div 
+                <motion.div
                   className="text-center"
                   initial={{ y: 50, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                   viewport={{ once: true }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
-                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 4, repeat: Infinity }
+                    transition={{
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                      scale: { duration: 4, repeat: Infinity },
                     }}
                   >
                     <svg
@@ -1069,30 +1250,34 @@ const Portfolio = () => {
                     </svg>
                   </motion.div>
                   <h3 className="text-lg font-semibold mb-2">Email</h3>
-                  <motion.a 
-                    href="mailto:yasinsheikhofficial@gmail.com" 
+                  <motion.a
+                    href="mailto:yasinsheikhofficial@gmail.com"
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
                     whileHover={{ x: 5 }}
                   >
                     yasinsheikhofficial@gmail.com
                   </motion.a>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="text-center"
                   initial={{ y: 50, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
                   viewport={{ once: true }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="w-16 h-16 bg-gradient-to-r from-pink-300 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
-                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 4, repeat: Infinity }
+                    transition={{
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                      scale: { duration: 4, repeat: Infinity },
                     }}
                   >
                     <svg
@@ -1107,30 +1292,34 @@ const Portfolio = () => {
                     </svg>
                   </motion.div>
                   <h3 className="text-lg font-semibold mb-2">Phone</h3>
-                  <motion.a 
-                    href="tel:+919834327583" 
+                  <motion.a
+                    href="tel:+919834327583"
                     className="text-gray-300 hover:text-cyan-400 transition-colors"
                     whileHover={{ x: 5 }}
                   >
                     +91-9834327583
                   </motion.a>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="text-center"
                   initial={{ y: 50, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5 }}
                   viewport={{ once: true }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
-                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 4, repeat: Infinity }
+                    transition={{
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                      scale: { duration: 4, repeat: Infinity },
                     }}
                   >
                     <svg
@@ -1155,22 +1344,26 @@ const Portfolio = () => {
                     linkedin.com/in/yasin-sheikh-101874244
                   </motion.a>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="text-center"
                   initial={{ y: 50, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
-                      rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 4, repeat: Infinity }
+                    transition={{
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                      scale: { duration: 4, repeat: Infinity },
                     }}
                   >
                     <svg
